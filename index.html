@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FY26 GMCS Training Compliance Dashboard</title>
+<link rel="icon" type="image/png" href="/logo.png">
+<!-- Open Graph / Facebook sharing meta -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://gmcs-dashboard.vercel.app/">
+<meta property="og:title" content="FY26 GMCS Training Compliance Dashboard">
+<meta property="og:description" content="FY26 GMCS Training Compliance Dashboard — Accenture GMCS PH. Live compliance tracking.">
+<meta property="og:image" content="/logo.png">
+<!-- Twitter sharing meta -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="FY26 GMCS Training Compliance Dashboard">
+<meta name="twitter:description" content="FY26 GMCS Training Compliance Dashboard — Accenture GMCS PH. Live compliance tracking.">
+<meta name="twitter:image" content="/logo.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+:root{--bg:#f5f4f0;--sur:#fff;--sur2:#f0efe9;--sur3:#e8e7e0;--bd:rgba(0,0,0,.10);--bd2:rgba(0,0,0,.18);--tx:#1a1a18;--tx2:#6b6b65;--tx3:#9c9c95;--gr:#3B6D11;--grb:#EAF3DE;--grm:#639922;--bl:#185FA5;--blb:#E6F1FB;--blm:#378ADD;--rd:#A32D2D;--rdb:#FCEBEB;--rdm:#E24B4A;--am:#854F0B;--amb:#FAEEDA;--amm:#BA7517;--pu:#534AB7;--pub:#EEEDFE;--te:#0F6E56;--teb:#E1F5EE;--r:10px}
+body.dark{--bg:#121212;--sur:#1a1a1a;--sur2:#242424;--sur3:#2e2e2e;--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.15);--tx:#f5f4f0;--tx2:#b5b5b0;--tx3:#8a8a85;--gr:#84cc16;--grb:#162e12;--grm:#65a30d;--bl:#60a5fa;--blb:#122538;--blm:#3b82f6;--rd:#f87171;--rdb:#381515;--rdm:#ef4444;--am:#fbbf24;--amb:#351f0b;--amm:#d97706;--pu:#818cf8;--pub:#1e1b4b;--te:#2dd4bf;--teb:#0d2e27}
+body.dark .tab.active{background:var(--tx);color:var(--bg)}
+body.dark .fg select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23b5b5b0'/%3E%3C/svg%3E")}
+body.dark .tr-sel-wrap select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23b5b5b0'/%3E%3C/svg%3E")}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);font-size:14px;min-height:100vh;transition:background 0.3s,color 0.3s}
+/* Loading screen */
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px}
+.loading-logo{width:280px;height:280px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:12px}
+.loading-logo img{width:100%;height:100%;object-fit:contain}
+.loading-title{font-size:18px;font-weight:700;color:var(--tx);letter-spacing:-.02em}
+.loading-sub{font-size:12px;color:var(--tx3)}
+.loading-spinner{width:32px;height:32px;border:3px solid var(--bd2);border-top-color:var(--blm);border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-bar-wrap{width:260px;height:5px;background:var(--sur3);border-radius:5px;overflow:hidden}
+.loading-bar{height:5px;background:linear-gradient(90deg,#A100FF,#378ADD);border-radius:5px;animation:loadpulse 1.5s ease-in-out infinite;width:60%}
+@keyframes loadpulse{0%{transform:translateX(-100%)}100%{transform:translateX(260px)}}
+.no-data-screen{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:12px;text-align:center;padding:40px}
+.no-data-icon{font-size:48px}
+.no-data-title{font-size:18px;font-weight:700;color:var(--tx)}
+.no-data-sub{font-size:13px;color:var(--tx3);max-width:400px;line-height:1.6}
+.no-data-btn{display:inline-block;margin-top:12px;padding:10px 24px;background:linear-gradient(135deg,#A100FF,#7B00FF);color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;cursor:pointer;border:none}
+/* Main wrap */
+.wrap{max-width:100%;margin:0 auto;padding:20px 24px 60px}
+/* Topbar */
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.brand{display:flex;align-items:center;gap:16px}
+.logo{width:90px;height:90px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:contain}
+.brand-t{font-size:15px;font-weight:700;letter-spacing:-.02em}
+.brand-s{font-size:11px;color:var(--tx3)}
+.tr-chips{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.chip{font-size:11px;color:var(--tx2);background:var(--sur);border:.5px solid var(--bd2);border-radius:20px;padding:4px 10px;display:flex;align-items:center;gap:4px}
+.pulse{width:7px;height:7px;border-radius:50%;background:var(--gr);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.admin-link{font-size:11px;padding:5px 12px;border:.5px solid var(--bd2);border-radius:6px;background:var(--sur);color:var(--tx2);cursor:pointer;text-decoration:none;display:flex;align-items:center;gap:5px}
+.admin-link:hover{background:var(--sur2)}
+/* Theme Switch */
+.theme-switch-wrap{display:flex;align-items:center;margin-left:6px}
+.theme-switch{position:relative;display:inline-block;width:50px;height:26px}
+.theme-switch input{opacity:0;width:0;height:0}
+.slider-t{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--sur2);border:0.5px solid var(--bd2);transition:.3s;border-radius:26px;display:flex;align-items:center;justify-content:space-between;padding:0 5px}
+.slider-t:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.3s cubic-bezier(0.4, 0, 0.2, 1);border-radius:50%;z-index:2}
+.theme-switch input:checked + .slider-t{background-color:var(--blm)}
+.theme-switch input:checked + .slider-t:before{transform:translateX(24px);background-color:#1e1e1e}
+.slider-t .sun-ico,.slider-t .moon-ico{font-size:11px;user-select:none;z-index:1;transition:opacity .3s}
+.slider-t .sun-ico{color:#f59e0b}
+.slider-t .moon-ico{color:#38bdf8;opacity:.3}
+.theme-switch input:checked + .slider-t .sun-ico{opacity:.3}
+.theme-switch input:checked + .slider-t .moon-ico{opacity:1}
+/* Filter bar */
+.fbar{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:14px 16px;margin-bottom:18px;display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em}
+.fg select,.fg input{font-size:12px;padding:6px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--sur2);color:var(--tx);outline:none}
+.fg select{padding-right:28px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b65'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;min-width:200px}
+.srch-wrap{display:flex;align-items:center;gap:6px;background:var(--sur2);border:.5px solid var(--bd2);border-radius:6px;padding:5px 10px}
+.srch-wrap input{border:none;background:transparent;outline:none;font-size:12px;color:var(--tx);width:170px}
+.srch-wrap input::placeholder{color:var(--tx3)}
+.btn-sm{font-size:11px;padding:6px 14px;border:.5px solid var(--bd2);border-radius:6px;background:transparent;color:var(--tx2);cursor:pointer;white-space:nowrap}
+.btn-sm:hover{background:var(--sur2)}
+/* Metrics */
+.mets{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin-bottom:18px}
+.met{background:var(--sur);border-radius:var(--r);padding:14px;border:.5px solid var(--bd)}
+.met-l{font-size:10px;color:var(--tx3);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em}
+.met-v{font-size:28px;font-weight:700;line-height:1;letter-spacing:-.03em}
+.met-s{font-size:10px;color:var(--tx3);margin-top:4px}
+.met-bar{margin-top:7px;height:4px;background:var(--sur2);border-radius:4px}
+.met-bf{height:4px;border-radius:4px}
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:16px;flex-wrap:wrap}
+.tab{font-size:12px;padding:7px 16px;border-radius:6px;cursor:pointer;border:.5px solid var(--bd2);background:transparent;color:var(--tx2);font-weight:500}
+.tab:hover{background:var(--sur2)}
+.tab.active{background:var(--tx);color:#fff;border-color:transparent}
+/* Section */
+.section{display:none}
+.section.active{display:block}
+/* Card */
+.card{background:var(--sur);border-radius:var(--r);border:.5px solid var(--bd);padding:16px 18px;margin-bottom:16px}
+.ctitle{font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+/* Category cards */
+.cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:16px}
+.cc{background:var(--sur);border-radius:var(--r);border:.5px solid var(--bd);padding:14px;cursor:pointer;transition:border-color .2s,box-shadow .2s}
+.cc:hover,.cc.sel{border-color:var(--blm);box-shadow:0 0 0 2px rgba(55,138,221,.13)}
+.cc.sel{background:var(--blb)}
+.cc-icon{font-size:20px;margin-bottom:8px}
+.cc-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.cc-stats{display:flex;gap:10px;margin-top:6px}
+.cc-stat{font-size:10px}
+.cc-bar{margin-top:8px;height:4px;background:var(--sur2);border-radius:4px}
+.cc-barf{height:4px;border-radius:4px;transition:width .5s}
+/* Manager/Project grid */
+.mgr-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;margin-bottom:16px}
+.mgr-card{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);overflow:hidden}
+.mgr-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--sur2);border-bottom:.5px solid var(--bd)}
+.mgr-name{font-size:12px;font-weight:600}
+.mgr-tot{font-size:11px;color:var(--tx3)}
+.mgr-cats{padding:10px 14px;display:flex;flex-direction:column;gap:5px}
+.mgr-row{display:flex;align-items:center;gap:8px;font-size:11px}
+.mgr-label{color:var(--tx2);width:120px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mgr-mini-bar{flex:1;height:5px;background:var(--sur3);border-radius:4px;overflow:hidden}
+.mgr-mini-fill{height:5px;border-radius:4px}
+.mgr-nums{font-size:10px;color:var(--tx3);white-space:nowrap}
+.mgr-full{font-size:10px;font-weight:600;padding:2px 7px;border-radius:10px}
+/* Training panel */
+.tr-panel{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:16px 18px;margin-bottom:16px;display:none}
+.tr-panel.vis{display:block}
+.tr-list{display:flex;flex-direction:column;gap:10px}
+.tr-row{border:.5px solid var(--bd);border-radius:7px;overflow:hidden}
+.tr-head{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--sur2);cursor:pointer;gap:8px}
+.tr-htitle{font-size:12px;font-weight:600;flex:1}
+.tr-hstats{display:flex;align-items:center;gap:8px;font-size:11px}
+.nc-t{color:var(--rd);font-weight:600}.cp-t{color:var(--gr);font-weight:600}
+.chev{font-size:10px;color:var(--tx3);transition:transform .2s}.chev.open{transform:rotate(180deg)}
+.tr-body{padding:10px 12px;display:none;flex-wrap:wrap;gap:4px}
+.tr-body.open{display:flex}
+.meid{font-family:'SF Mono',Consolas,monospace;font-size:10px;color:var(--bl);background:var(--blb);padding:2px 6px;border-radius:3px}
+/* Table */
+.twrap{background:var(--sur);border-radius:var(--r);border:.5px solid var(--bd);overflow:hidden;margin-bottom:16px}
+.ttbar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:.5px solid var(--bd);flex-wrap:wrap;gap:8px}
+.ttl{font-size:13px;font-weight:600}
+.bcount{font-size:11px;background:var(--rdb);color:var(--rd);border-radius:20px;padding:2px 8px;font-weight:600}
+.tpills{display:flex;gap:5px;flex-wrap:wrap}
+.tpill{font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;border:.5px solid var(--bd2);background:transparent;color:var(--tx2)}
+.tpill:hover{background:var(--sur2)}
+.tpill.on{color:var(--bl);background:var(--blb);border-color:transparent;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:7px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--tx3);background:var(--sur2);border-bottom:.5px solid var(--bd);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}
+tbody tr{border-bottom:.5px solid var(--bd);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--sur2)}
+tbody td{padding:8px 12px;vertical-align:middle}
+.eid{font-family:'SF Mono',Consolas,monospace;font-size:11px;color:var(--bl);background:var(--blb);padding:2px 6px;border-radius:4px;display:inline-block}
+.tfoot{padding:9px 16px;border-top:.5px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
+.tinf{font-size:11px;color:var(--tx3)}
+.pgr{display:flex;gap:4px}
+.pg{font-size:11px;padding:4px 9px;border:.5px solid var(--bd2);border-radius:5px;background:transparent;color:var(--tx2);cursor:pointer}
+.pg:hover{background:var(--sur2)}
+.pg.on{background:var(--blm);color:#fff;border-color:transparent}
+/* Legend */
+.leg{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:10px}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--tx2)}
+.ld{width:9px;height:9px;border-radius:2px}
+/* Heatmap */
+.htable{width:100%;border-collapse:collapse;font-size:11px}
+.htable th{padding:6px 8px;text-align:center;font-size:10px;color:var(--tx3);border-bottom:.5px solid var(--bd);font-weight:600;background:var(--sur2)}
+.htable td{padding:6px 8px;text-align:center;border-bottom:.5px solid var(--bd)}
+.htable tr:last-child td{border-bottom:none}
+.htable tr:hover td{background:var(--sur2)}
+.htable td:first-child{text-align:left;font-weight:600;font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hcell{display:inline-flex;align-items:center;justify-content:center;width:32px;height:22px;border-radius:4px;font-weight:600;font-size:11px}
+/* Training filter */
+.tr-sel-wrap{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.tr-sel-wrap label{font-size:11px;font-weight:600;color:var(--tx2)}
+.tr-sel-wrap select{font-size:12px;padding:6px 28px 6px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--sur2);color:var(--tx);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b65'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;min-width:320px}
+/* Footer */
+.dfooter{text-align:center;font-size:11px;color:var(--tx3);padding-top:14px;border-top:.5px solid var(--bd)}
+@media(max-width:700px){
+  .row2{grid-template-columns:1fr}
+  .mets{grid-template-columns:repeat(2,1fr)}
+  .mgr-grid{grid-template-columns:1fr}
+  /* Mobile optimizations */
+  .topbar{flex-direction:column;align-items:flex-start;gap:12px}
+  .tr-chips{width:100%;justify-content:space-between;gap:6px}
+  .theme-switch-wrap{margin-left:auto}
+  .fbar{flex-direction:column;align-items:stretch;gap:12px;padding:12px}
+  .fg select{width:100%;min-width:unset}
+  .srch-wrap{width:100%}
+  .srch-wrap input{width:100%}
+  .btn-sm{width:100%;text-align:center;padding:8px}
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{flex-shrink:0;padding:6px 12px;font-size:11px}
+  .cc{padding:12px}
+  .met-v{font-size:24px}
+  /* Scrollable table container */
+  .tbl-container{overflow-x:auto;-webkit-overflow-scrolling:touch;margin-bottom:0}
+  table{min-width:750px}
+}
+</style>
+</head>
+<body>
+
+<!-- Loading screen -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="loading-logo"><img src="/logo.png" alt="Logo"></div>
+  <div class="loading-title">FY26 GMCS Compliance Dashboard</div>
+  <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
+  <div class="loading-sub" id="loadingMsg">Loading latest data…</div>
+</div>
+
+<!-- No data screen -->
+<div id="noDataScreen" class="no-data-screen">
+  <div class="no-data-icon">📂</div>
+  <div class="no-data-title">No data uploaded yet</div>
+  <div class="no-data-sub">The dashboard has no compliance data to show. Please contact your administrator to upload the required SharePoint export files.</div>
+</div>
+
+<!-- Main dashboard -->
+<div id="dashboard" style="display:none">
+<div class="wrap">
+
+<div class="topbar">
+  <div class="brand">
+    <div class="logo"><img src="/logo.png" alt="Logo"></div>
+    <div>
+      <div class="brand-t">FY26 GMCS Training Compliance Dashboard</div>
+      <div class="brand-s" id="lastUpdated">Accenture · GMCS PH</div>
+    </div>
+  </div>
+  <div class="tr-chips">
+    <div class="chip"><div class="pulse"></div>Live</div>
+    <div class="chip" id="chipTotal">–</div>
+    <div class="chip" id="chipFilter">All teams</div>
+    <div class="theme-switch-wrap">
+      <label class="theme-switch" title="Toggle Light/Dark Mode">
+        <input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)">
+        <span class="slider-t">
+          <span class="sun-ico">☀️</span>
+          <span class="moon-ico">🌙</span>
+        </span>
+      </label>
+    </div>
+    <a href="/admin" class="admin-link">⚙ Admin</a>
+  </div>
+</div>
+
+<!-- Filter bar -->
+<div class="fbar">
+  <div class="fg">
+    <label>Manager / POC</label>
+    <select id="fMgr" onchange="applyFilters()"><option value="">All Managers</option></select>
+  </div>
+  <div class="fg">
+    <label>GMCS Project Team</label>
+    <select id="fProj" onchange="applyFilters()"><option value="">All Projects</option></select>
+  </div>
+  <div class="fg">
+    <label>Search EID</label>
+    <div class="srch-wrap">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="fSearch" placeholder="Search EID or project…" oninput="applyFilters()">
+    </div>
+  </div>
+  <button class="btn-sm" onclick="resetFilters()">↺ Reset</button>
+</div>
+
+<!-- Metrics -->
+<div class="mets" id="metricsRow"></div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab active" onclick="showTab('overview',this)">📊 Overview</button>
+  <button class="tab" onclick="showTab('byManager',this)">👤 By Manager</button>
+  <button class="tab" onclick="showTab('byProject',this)">📁 By Project</button>
+  <button class="tab" onclick="showTab('byTraining',this)">📚 By Training</button>
+  <button class="tab" onclick="showTab('employees',this)">👥 All Employees</button>
+</div>
+
+<!-- Overview -->
+<div class="section active" id="tab-overview">
+  <div class="row2">
+    <div class="card">
+      <div class="ctitle">Compliance by Category</div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--grm)"></div>Compliant</div>
+        <div class="li"><div class="ld" style="background:var(--rdm)"></div>Non-compliant</div>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="catChart" role="img" aria-label="Category compliance bar chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle">Overall Status</div>
+      <div class="leg">
+        <div class="li"><div class="ld" style="background:var(--grm)"></div>Fully compliant</div>
+        <div class="li"><div class="ld" style="background:var(--amm)"></div>Partial</div>
+        <div class="li"><div class="ld" style="background:var(--rdm)"></div>No submissions</div>
+      </div>
+      <div style="position:relative;height:220px"><canvas id="overallChart" role="img" aria-label="Overall status donut"></canvas></div>
+    </div>
+  </div>
+  <div style="font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:9px">Click a category to expand non-compliant EIDs per training</div>
+  <div class="cg" id="catCards"></div>
+  <div class="tr-panel" id="trPanel">
+    <div class="ctitle" id="trPanelTitle"></div>
+    <div class="tr-list" id="trList"></div>
+  </div>
+</div>
+
+<!-- By Manager -->
+<div class="section" id="tab-byManager">
+  <div class="tr-sel-wrap">
+    <label>Filter by Training:</label>
+    <select id="mgrTrSel" onchange="renderMgrTab()"><option value="">— All Categories (overall) —</option></select>
+  </div>
+  <div class="mgr-grid" id="mgrGrid"></div>
+</div>
+
+<!-- By Project -->
+<div class="section" id="tab-byProject">
+  <div class="tr-sel-wrap">
+    <label>Filter by Training:</label>
+    <select id="projTrSel" onchange="renderProjTab()"><option value="">— All Categories (overall) —</option></select>
+  </div>
+  <div class="mgr-grid" id="projGrid"></div>
+</div>
+
+<!-- By Training -->
+<div class="section" id="tab-byTraining">
+  <div class="tr-sel-wrap">
+    <label>Select Training:</label>
+    <select id="trTrSel" onchange="renderTrTab()"></select>
+  </div>
+  <div class="row2">
+    <div class="card">
+      <div class="ctitle" id="trMgrChartTitle">By Manager</div>
+      <div style="position:relative;height:260px"><canvas id="trMgrChart" role="img" aria-label="Manager compliance chart"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle" id="trProjChartTitle">By Project</div>
+      <div style="position:relative;height:260px"><canvas id="trProjChart" role="img" aria-label="Project compliance chart"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ctitle">Manager × All Trainings Heatmap</div>
+    <div style="overflow-x:auto"><table class="htable" id="trHeatTable"></table></div>
+  </div>
+</div>
+
+<!-- Employees -->
+<div class="section" id="tab-employees">
+  <div class="twrap">
+    <div class="ttbar">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="ttl">Employee Records</div>
+        <div id="empBadge" class="bcount">–</div>
+      </div>
+      <div class="tpills">
+        <button class="tpill on" onclick="setEmpFilter('all',this)">All</button>
+        <button class="tpill" onclick="setEmpFilter('full',this)">✓ Fully compliant</button>
+        <button class="tpill" onclick="setEmpFilter('partial',this)">~ Partial</button>
+        <button class="tpill" onclick="setEmpFilter('none',this)">✗ No submissions</button>
+      </div>
+    </div>
+    <div class="tbl-container">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Enterprise ID</th><th>Project</th><th>Manager</th><th>Level</th><th>Loc</th><th>%</th>
+          <th style="text-align:center">Ethics</th><th style="text-align:center">IS Adv</th><th style="text-align:center">Gen AI</th><th style="text-align:center">Survey</th><th style="text-align:center">Workday</th>
+        </tr></thead>
+        <tbody id="empBody"></tbody>
+      </table>
+    </div>
+    <div class="tfoot">
+      <div class="tinf" id="empInfo">–</div>
+      <div class="pgr" id="empPager"></div>
+    </div>
+  </div>
+</div>
+
+<div class="dfooter">FY26 GMCS Training Compliance Report · Accenture GMCS PH · Data updated via Admin portal</div>
+</div><!-- end wrap -->
+</div><!-- end dashboard -->
+
+<script>
+// ── All dashboard state in one object — no global variable pollution
+const DB = {
+  data: null,
+  filteredEids: [],
+  state: { mgr: '', proj: '', search: '' },
+  empStatusFilter: 'all',
+  empPage: 1,
+  empPageSize: 30,
+  selCat: null,
+  charts: { overview: null, overall: null, trMgr: null, trProj: null }
+};
+
+const CAT_ICONS  = {'Ethics & Compliance':'⚖️','IS Advocate':'🔐','Gen AI':'🤖','Survey':'📋','Workday':'💼'};
+const CAT_COLORS = {'Ethics & Compliance':'var(--gr)','IS Advocate':'var(--bl)','Gen AI':'var(--pu)','Survey':'var(--am)','Workday':'var(--te)'};
+
+function getChartColors() {
+  const isDark = document.body.classList.contains('dark');
+  return {
+    grid: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+    text: isDark ? '#b5b5b0' : '#6b6b65'
+  };
+}
+
+// ── FETCH DATA FROM API
+async function loadData() {
+  try {
+    document.getElementById('loadingMsg').textContent = 'Fetching latest compliance data…';
+    const res = await fetch('/api/data');
+    if (res.status === 404) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('noDataScreen').style.display = 'flex';
+      return;
+    }
+    if (!res.ok) throw new Error('API error ' + res.status);
+    const json = await res.json();
+    if (json.error) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('noDataScreen').style.display = 'flex';
+      return;
+    }
+    // Convert title_done arrays back to Sets for fast lookup
+    json._title_done = {};
+    (json.all_titles || []).forEach(t => {
+      json._title_done[t] = new Set(json.title_done[t] || []);
+    });
+    DB.data = json;
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    if (json.generated_at) {
+      const d = new Date(json.generated_at);
+      document.getElementById('lastUpdated').textContent =
+        'Accenture · GMCS PH · Last updated: ' + d.toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    }
+    initDashboard();
+  } catch(err) {
+    document.getElementById('loadingMsg').textContent = 'Error: ' + err.message;
+  }
+}
+
+function initDashboard() {
+  buildDropdowns();
+  applyFilters();
+}
+
+// ── HELPERS
+function pct(a, b) { return b ? Math.round(a / b * 100) : 0; }
+
+function titleDone(eid, title) {
+  return !!(DB.data._title_done && DB.data._title_done[title] && DB.data._title_done[title].has(eid));
+}
+
+// ── BUILD DROPDOWNS
+function buildDropdowns() {
+  const d = DB.data;
+  const mgrSel = document.getElementById('fMgr');
+  mgrSel.innerHTML = '<option value="">All Managers</option>';
+  d.managers.forEach(m => { const o = document.createElement('option'); o.value = m; o.textContent = m; mgrSel.appendChild(o); });
+
+  const projSel = document.getElementById('fProj');
+  projSel.innerHTML = '<option value="">All Projects</option>';
+  d.projects.forEach(p => { const o = document.createElement('option'); o.value = p; o.textContent = p; projSel.appendChild(o); });
+
+  ['mgrTrSel','projTrSel'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— All Categories (overall) —</option>';
+    d.categories.forEach(cat => {
+      d.cat_trainings[cat].forEach(title => {
+        const o = document.createElement('option'); o.value = title; o.textContent = title + ' [' + cat + ']'; sel.appendChild(o);
+      });
+    });
+  });
+
+  const trSel = document.getElementById('trTrSel');
+  trSel.innerHTML = '';
+  d.categories.forEach(cat => {
+    d.cat_trainings[cat].forEach(title => {
+      const o = document.createElement('option'); o.value = title; o.textContent = title + ' [' + cat + ']'; trSel.appendChild(o);
+    });
+  });
+}
+
+// ── FILTERS
+function applyFilters() {
+  const d = DB.data;
+  DB.state.mgr    = document.getElementById('fMgr').value;
+  DB.state.proj   = document.getElementById('fProj').value;
+  DB.state.search = document.getElementById('fSearch').value.toLowerCase();
+
+  DB.filteredEids = Object.keys(d.eid_status).filter(eid => {
+    const v = d.eid_status[eid];
+    if (DB.state.mgr  && v.manager  !== DB.state.mgr)  return false;
+    if (DB.state.proj && v.project  !== DB.state.proj) return false;
+    if (DB.state.search && !eid.includes(DB.state.search) && !v.project.toLowerCase().includes(DB.state.search)) return false;
+    return true;
+  });
+
+  const parts = [];
+  if (DB.state.mgr)  parts.push('Mgr: ' + DB.state.mgr);
+  if (DB.state.proj) parts.push(DB.state.proj);
+  if (DB.state.search) parts.push('"' + DB.state.search + '"');
+  document.getElementById('chipFilter').textContent = parts.length ? parts.join(' · ') : 'All teams';
+  document.getElementById('chipTotal').textContent  = DB.filteredEids.length + ' employees';
+
+  DB.empPage = 1;
+  renderMetrics();
+  renderOverview();
+  renderMgrTab();
+  renderProjTab();
+  renderTrTab();
+  renderEmpTable();
+}
+
+function resetFilters() {
+  document.getElementById('fMgr').value = '';
+  document.getElementById('fProj').value = '';
+  document.getElementById('fSearch').value = '';
+  applyFilters();
+}
+
+// ── METRICS
+function renderMetrics() {
+  const d = DB.data;
+  const eids  = DB.filteredEids;
+  const total = eids.length;
+  if (!total) { document.getElementById('metricsRow').innerHTML = '<div class="met"><div class="met-l">No data</div></div>'; return; }
+  const full    = eids.filter(e => d.eid_status[e].done === 5).length;
+  const partial = eids.filter(e => d.eid_status[e].done > 0 && d.eid_status[e].done < 5).length;
+  const zero    = eids.filter(e => d.eid_status[e].done === 0).length;
+  let html = `
+    <div class="met"><div class="met-l">Total</div><div class="met-v">${total}</div><div class="met-s">Active employees</div></div>
+    <div class="met"><div class="met-l">Fully compliant</div><div class="met-v" style="color:var(--gr)">${full}</div><div class="met-s">${pct(full,total)}% of filtered</div><div class="met-bar"><div class="met-bf" style="width:${pct(full,total)}%;background:var(--grm)"></div></div></div>
+    <div class="met"><div class="met-l">Partial</div><div class="met-v" style="color:var(--am)">${partial}</div><div class="met-s">${pct(partial,total)}%</div><div class="met-bar"><div class="met-bf" style="width:${pct(partial,total)}%;background:var(--amm)"></div></div></div>
+    <div class="met"><div class="met-l">No submissions</div><div class="met-v" style="color:var(--rd)">${zero}</div><div class="met-s">${pct(zero,total)}%</div><div class="met-bar"><div class="met-bf" style="width:${pct(zero,total)}%;background:var(--rdm)"></div></div></div>
+  `;
+  d.categories.forEach(cat => {
+    const c = eids.filter(e => d.eid_status[e].compliance[cat]).length;
+    html += `<div class="met"><div class="met-l">${CAT_ICONS[cat]} ${cat}</div><div class="met-v" style="color:${CAT_COLORS[cat]}">${c}</div><div class="met-s">${total-c} missing · ${pct(c,total)}%</div><div class="met-bar"><div class="met-bf" style="width:${pct(c,total)}%;background:${CAT_COLORS[cat]}"></div></div></div>`;
+  });
+  document.getElementById('metricsRow').innerHTML = html;
+}
+
+// ── OVERVIEW
+function renderOverview() {
+  const d    = DB.data;
+  const eids = DB.filteredEids;
+  const total = eids.length;
+
+  const catData = d.categories.map(cat => ({
+    c:  eids.filter(e => d.eid_status[e].compliance[cat]).length,
+    nc: eids.filter(e => !d.eid_status[e].compliance[cat]).length
+  }));
+
+  if (DB.charts.overview) DB.charts.overview.destroy();
+  DB.charts.overview = new Chart(document.getElementById('catChart'), {
+    type: 'bar',
+    data: { labels: d.categories, datasets: [
+      { label: 'Compliant',     data: catData.map(x => x.c),  backgroundColor: '#639922', borderRadius: 4 },
+      { label: 'Non-compliant', data: catData.map(x => x.nc), backgroundColor: '#E24B4A', borderRadius: 4 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { color: getChartColors().text, font: { size: 10 } } },
+                y: { grid: { color: getChartColors().grid }, ticks: { color: getChartColors().text, font: { size: 10 } } } } }
+  });
+
+  const full = eids.filter(e => d.eid_status[e].done === 5).length;
+  const part = eids.filter(e => d.eid_status[e].done > 0 && d.eid_status[e].done < 5).length;
+  const zero = eids.filter(e => d.eid_status[e].done === 0).length;
+  if (DB.charts.overall) DB.charts.overall.destroy();
+  DB.charts.overall = new Chart(document.getElementById('overallChart'), {
+    type: 'doughnut',
+    data: { labels: ['Fully compliant','Partial','No submissions'],
+            datasets: [{ data: [full,part,zero], backgroundColor: ['#639922','#BA7517','#E24B4A'], borderWidth: 0, hoverOffset: 3 }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '70%', plugins: { legend: { display: false } } }
+  });
+
+  // Category cards
+  const cg = document.getElementById('catCards');
+  cg.innerHTML = '';
+  d.categories.forEach(cat => {
+    const idx = d.categories.indexOf(cat);
+    const c = catData[idx].c, nc = catData[idx].nc;
+    const p = pct(c, total);
+    const div = document.createElement('div');
+    div.className = 'cc' + (DB.selCat === cat ? ' sel' : '');
+    div.innerHTML = `<div class="cc-icon">${CAT_ICONS[cat]}</div><div class="cc-name">${cat}</div><div class="cc-stats"><div class="cc-stat" style="color:var(--gr)">✓ <b>${c}</b> compliant</div><div class="cc-stat" style="color:var(--rd)">✗ <b>${nc}</b> missing</div></div><div class="cc-bar"><div class="cc-barf" style="width:${p}%;background:${CAT_COLORS[cat]}"></div></div><div style="font-size:10px;color:var(--tx3);margin-top:3px">${p}% completion rate</div>`;
+    div.onclick = () => toggleCatPanel(cat, div);
+    cg.appendChild(div);
+  });
+
+  if (DB.selCat) renderCatPanel(DB.selCat);
+}
+
+function toggleCatPanel(cat, el) {
+  if (DB.selCat === cat) {
+    DB.selCat = null;
+    document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
+    document.getElementById('trPanel').classList.remove('vis');
+    return;
+  }
+  DB.selCat = cat;
+  document.querySelectorAll('.cc').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+  renderCatPanel(cat);
+}
+
+function renderCatPanel(cat) {
+  const d = DB.data;
+  document.getElementById('trPanelTitle').textContent = CAT_ICONS[cat] + ' ' + cat + ' — Non-compliant EIDs by Training';
+  const list = document.getElementById('trList');
+  list.innerHTML = '';
+  (d.cat_trainings[cat] || []).forEach(title => {
+    const ncEids = DB.filteredEids.filter(e => !titleDone(e, title));
+    const cpCount = DB.filteredEids.length - ncEids.length;
+    const div = document.createElement('div'); div.className = 'tr-row';
+    const bid = 'b' + Math.random().toString(36).slice(2);
+    const cid = 'c' + Math.random().toString(36).slice(2);
+    div.innerHTML = `<div class="tr-head" onclick="toggleTR('${bid}','${cid}')"><div class="tr-htitle">${title}</div><div class="tr-hstats"><span class="nc-t">${ncEids.length} non-compliant</span><span class="cp-t">${cpCount} done</span><span class="chev" id="${cid}">▼</span></div></div><div class="tr-body" id="${bid}">${ncEids.map(e => `<span class="meid">${e}</span>`).join('') || '<span style="font-size:11px;color:var(--gr)">✓ All compliant in current filter</span>'}</div>`;
+    list.appendChild(div);
+  });
+  document.getElementById('trPanel').classList.add('vis');
+  document.getElementById('trPanel').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── BY MANAGER
+function renderMgrTab() {
+  const d = DB.data;
+  const selTitle = document.getElementById('mgrTrSel').value;
+  const grid = document.getElementById('mgrGrid');
+  grid.innerHTML = '';
+  const relevantMgrs = DB.state.mgr ? [DB.state.mgr] :
+    [...new Set(DB.filteredEids.map(e => d.eid_status[e].manager).filter(Boolean))].sort();
+
+  relevantMgrs.forEach(mgr => {
+    const mEids = DB.filteredEids.filter(e => d.eid_status[e].manager === mgr);
+    if (!mEids.length) return;
+    const total = mEids.length;
+    const full  = mEids.filter(e => d.eid_status[e].done === 5).length;
+    const zero  = mEids.filter(e => d.eid_status[e].done === 0).length;
+    const fp = pct(full, total);
+    const fCol  = fp >= 80 ? 'var(--gr)' : fp >= 50 ? 'var(--am)' : 'var(--rd)';
+    const fBg   = fp >= 80 ? 'var(--grb)' : fp >= 50 ? 'var(--amb)' : 'var(--rdb)';
+
+    let body = '';
+    if (!selTitle) {
+      body = d.categories.map(cat => {
+        const c = mEids.filter(e => d.eid_status[e].compliance[cat]).length;
+        const p = pct(c, total);
+        return `<div class="mgr-row"><span class="mgr-label">${CAT_ICONS[cat]} ${cat}</span><div class="mgr-mini-bar"><div class="mgr-mini-fill" style="width:${p}%;background:${CAT_COLORS[cat]}"></div></div><span class="mgr-nums">${c}/${total} · ${total-c} missing</span></div>`;
+      }).join('');
+    } else {
+      const c = mEids.filter(e => titleDone(e, selTitle)).length;
+      const p = pct(c, total);
+      const cat = d.title_to_cat[selTitle] || '';
+      const ncEids = mEids.filter(e => !titleDone(e, selTitle));
+      body = `<div class="mgr-row" style="margin-bottom:6px"><span style="font-size:11px;font-weight:500;color:var(--tx)">${selTitle}</span></div>
+        <div class="mgr-row"><span class="mgr-label">Completed</span><div class="mgr-mini-bar"><div class="mgr-mini-fill" style="width:${p}%;background:${CAT_COLORS[cat]||'#378ADD'}"></div></div><span class="mgr-nums">${c}/${total}</span></div>
+        <div style="padding:6px 0 2px"><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">${ncEids.length} non-compliant EIDs:</div><div style="display:flex;flex-wrap:wrap;gap:3px">${ncEids.map(e=>`<span class="meid">${e}</span>`).join('') || '<span style="font-size:11px;color:var(--gr)">✓ All compliant</span>'}</div></div>`;
+    }
+    const card = document.createElement('div'); card.className = 'mgr-card';
+    card.innerHTML = `<div class="mgr-head"><div><div class="mgr-name">👤 ${mgr}</div><div class="mgr-tot">${total} employee${total>1?'s':''} · ${zero} no submissions</div></div><span class="mgr-full" style="background:${fBg};color:${fCol}">${full} fully done</span></div><div class="mgr-cats">${body}</div>`;
+    grid.appendChild(card);
+  });
+  if (!grid.children.length) grid.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:20px">No data for current filter.</div>';
+}
+
+// ── BY PROJECT
+function renderProjTab() {
+  const d = DB.data;
+  const selTitle = document.getElementById('projTrSel').value;
+  const grid = document.getElementById('projGrid');
+  grid.innerHTML = '';
+  const relevantProjs = DB.state.proj ? [DB.state.proj] :
+    [...new Set(DB.filteredEids.map(e => d.eid_status[e].project).filter(Boolean))].sort();
+
+  relevantProjs.forEach(proj => {
+    const pEids = DB.filteredEids.filter(e => d.eid_status[e].project === proj);
+    if (!pEids.length) return;
+    const total = pEids.length;
+    const full  = pEids.filter(e => d.eid_status[e].done === 5).length;
+    const zero  = pEids.filter(e => d.eid_status[e].done === 0).length;
+    const fp = pct(full, total);
+    const fCol = fp >= 80 ? 'var(--gr)' : fp >= 50 ? 'var(--am)' : 'var(--rd)';
+    const fBg  = fp >= 80 ? 'var(--grb)' : fp >= 50 ? 'var(--amb)' : 'var(--rdb)';
+
+    let body = '';
+    if (!selTitle) {
+      body = d.categories.map(cat => {
+        const c = pEids.filter(e => d.eid_status[e].compliance[cat]).length;
+        const p = pct(c, total);
+        return `<div class="mgr-row"><span class="mgr-label">${CAT_ICONS[cat]} ${cat}</span><div class="mgr-mini-bar"><div class="mgr-mini-fill" style="width:${p}%;background:${CAT_COLORS[cat]}"></div></div><span class="mgr-nums">${c}/${total} · ${total-c} missing</span></div>`;
+      }).join('');
+    } else {
+      const c = pEids.filter(e => titleDone(e, selTitle)).length;
+      const p = pct(c, total);
+      const cat = d.title_to_cat[selTitle] || '';
+      const ncEids = pEids.filter(e => !titleDone(e, selTitle));
+      body = `<div class="mgr-row" style="margin-bottom:6px"><span style="font-size:11px;font-weight:500;color:var(--tx)">${selTitle}</span></div>
+        <div class="mgr-row"><span class="mgr-label">Completed</span><div class="mgr-mini-bar"><div class="mgr-mini-fill" style="width:${p}%;background:${CAT_COLORS[cat]||'#378ADD'}"></div></div><span class="mgr-nums">${c}/${total}</span></div>
+        <div style="padding:6px 0 2px"><div style="font-size:10px;color:var(--tx3);margin-bottom:4px">${ncEids.length} non-compliant EIDs:</div><div style="display:flex;flex-wrap:wrap;gap:3px">${ncEids.map(e=>`<span class="meid">${e}</span>`).join('') || '<span style="font-size:11px;color:var(--gr)">✓ All compliant</span>'}</div></div>`;
+    }
+    const card = document.createElement('div'); card.className = 'mgr-card';
+    card.innerHTML = `<div class="mgr-head"><div><div class="mgr-name">📁 ${proj}</div><div class="mgr-tot">${total} employee${total>1?'s':''} · ${zero} no submissions</div></div><span class="mgr-full" style="background:${fBg};color:${fCol}">${full} fully done</span></div><div class="mgr-cats">${body}</div>`;
+    grid.appendChild(card);
+  });
+  if (!grid.children.length) grid.innerHTML = '<div style="color:var(--tx3);font-size:13px;padding:20px">No data for current filter.</div>';
+}
+
+// ── BY TRAINING
+function renderTrTab() {
+  const d = DB.data;
+  const title = document.getElementById('trTrSel').value;
+  if (!title) return;
+  const cat   = d.title_to_cat[title] || '';
+  const colorVar = CAT_COLORS[cat] || 'var(--bl)';
+  const color = colorVar.startsWith('var(') 
+    ? getComputedStyle(document.body).getPropertyValue(colorVar.slice(4, -1)).trim()
+    : colorVar;
+
+  document.getElementById('trMgrChartTitle').textContent  = 'By Manager — ' + title;
+  document.getElementById('trProjChartTitle').textContent = 'By Project — ' + title;
+
+  const mgrs  = [...new Set(DB.filteredEids.map(e => d.eid_status[e].manager).filter(Boolean))].sort();
+  const mgrC  = mgrs.map(m => DB.filteredEids.filter(e => d.eid_status[e].manager === m && titleDone(e, title)).length);
+  const mgrNC = mgrs.map(m => DB.filteredEids.filter(e => d.eid_status[e].manager === m && !titleDone(e, title)).length);
+  const mgrLabels = mgrs.map(m => m.split('.').slice(-1)[0] || m);
+
+  if (DB.charts.trMgr) DB.charts.trMgr.destroy();
+  DB.charts.trMgr = new Chart(document.getElementById('trMgrChart'), {
+    type: 'bar',
+    data: { labels: mgrLabels, datasets: [
+      { label: 'Done',    data: mgrC,  backgroundColor: color + '99', borderRadius: 3 },
+      { label: 'Missing', data: mgrNC, backgroundColor: '#E24B4A88',  borderRadius: 3 }
+    ]},
+    options: { responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { display: false }, ticks: { color: getChartColors().text, font: { size: 9 } } }, y: { grid: { color: getChartColors().grid }, ticks: { color: getChartColors().text, font: { size: 10 } } } } }
+  });
+
+  const allProjs = [...new Set(DB.filteredEids.map(e => d.eid_status[e].project).filter(Boolean))].sort();
+  const projData = allProjs.map(proj => {
+    const pe  = DB.filteredEids.filter(e => d.eid_status[e].project === proj);
+    const c   = pe.filter(e => titleDone(e, title)).length;
+    return { proj, c, nc: pe.length - c, total: pe.length };
+  }).filter(x => x.total > 0).sort((a, b) => b.total - a.total).slice(0, 12);
+  const projLabels = projData.map(x => x.proj.replace('IE - ISA - GMCS ', '').replace('IE - ISA - ', ''));
+
+  if (DB.charts.trProj) DB.charts.trProj.destroy();
+  DB.charts.trProj = new Chart(document.getElementById('trProjChart'), {
+    type: 'bar',
+    data: { labels: projLabels, datasets: [
+      { label: 'Done',    data: projData.map(x => x.c),  backgroundColor: color + '99', borderRadius: 3 },
+      { label: 'Missing', data: projData.map(x => x.nc), backgroundColor: '#E24B4A88',  borderRadius: 3 }
+    ]},
+    options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { x: { grid: { color: getChartColors().grid }, ticks: { color: getChartColors().text, font: { size: 10 } } }, y: { grid: { display: false }, ticks: { color: getChartColors().text, font: { size: 9 } } } } }
+  });
+
+  // Heatmap
+  const titles = d.all_titles;
+  const shortTitle = t => t.replace('COBE Insights: ','').replace(' (FY26)','').replace(' (FY26-A)','').replace(' (FY26-B)','')
+    .replace('Reinvention with Agentic AI Learning Program','Reinvention AI')
+    .replace('Information Security Knowledge Check','IS Knowledge')
+    .replace('Substituted Filing for February 16, 2026','Sub Filing Feb')
+    .replace('Team Engagement (Q12) Survey','Q12 Survey')
+    .replace('Preventing Sexual Harassment and Gender Bias at Work \u2013 Philippines (FY26)','Prev Harassment')
+    .replace('Mandatory Substituted Filing Survey','Mand Sub Filing')
+    .replace('Agentic AI ','AI ');
+
+  let html = `<thead><tr><th>Manager</th>${titles.map(t => `<th title="${t}">${shortTitle(t)}</th>`).join('')}<th>Overall</th></tr></thead><tbody>`;
+  mgrs.forEach(mgr => {
+    const mEids = DB.filteredEids.filter(e => d.eid_status[e].manager === mgr);
+    const tot = mEids.length;
+    if (!tot) return;
+    html += `<tr><td title="${mgr}">${mgr}</td>`;
+    titles.forEach(t => {
+      const c = mEids.filter(e => titleDone(e, t)).length;
+      const p = pct(c, tot);
+      const bg = p >= 80 ? 'var(--grb)' : p >= 50 ? 'var(--amb)' : 'var(--rdb)';
+      const fg = p >= 80 ? 'var(--gr)' : p >= 50 ? 'var(--am)' : 'var(--rd)';
+      html += `<td><span class="hcell" style="background:${bg};color:${fg}">${p}%</span></td>`;
+    });
+    const op = pct(mEids.filter(e => d.eid_status[e].done === 5).length, tot);
+    const obg = op >= 80 ? 'var(--grb)' : op >= 50 ? 'var(--amb)' : 'var(--rdb)';
+    const ofg = op >= 80 ? 'var(--gr)' : op >= 50 ? 'var(--am)' : 'var(--rd)';
+    html += `<td><span class="hcell" style="background:${obg};color:${ofg};font-size:12px;font-weight:700">${op}%</span></td></tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('trHeatTable').innerHTML = html;
+}
+
+// ── EMPLOYEE TABLE
+function setEmpFilter(f, btn) {
+  DB.empStatusFilter = f; DB.empPage = 1;
+  document.querySelectorAll('.tpill').forEach(b => b.classList.remove('on'));
+  btn.classList.add('on');
+  renderEmpTable();
+}
+
+function renderEmpTable() {
+  const d = DB.data;
+  const rows = DB.filteredEids.filter(eid => {
+    const v = d.eid_status[eid];
+    if (DB.empStatusFilter === 'full')    return v.done === 5;
+    if (DB.empStatusFilter === 'partial') return v.done > 0 && v.done < 5;
+    if (DB.empStatusFilter === 'none')    return v.done === 0;
+    return true;
+  });
+  const total = rows.length;
+  const pages = Math.ceil(total / DB.empPageSize);
+  DB.empPage  = Math.min(DB.empPage, pages || 1);
+  const slice = rows.slice((DB.empPage - 1) * DB.empPageSize, DB.empPage * DB.empPageSize);
+  const nc    = rows.filter(e => d.eid_status[e].done < 5).length;
+
+  document.getElementById('empBadge').textContent = nc + ' non-compliant shown';
+  document.getElementById('empBody').innerHTML = slice.map((eid, i) => {
+    const v  = d.eid_status[eid];
+    const n  = (DB.empPage - 1) * DB.empPageSize + i + 1;
+    const bc = v.pct === 100 ? '#639922' : v.pct >= 60 ? '#BA7517' : '#E24B4A';
+    return `<tr><td style="color:var(--tx3)">${n}</td><td><span class="eid">${eid}</span></td>
+      <td style="color:var(--tx2);font-size:11px;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.project}</td>
+      <td style="color:var(--tx3);font-size:10px;max-width:120px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${v.manager}</td>
+      <td style="font-size:10px;color:var(--tx2)">${v.level.replace(/\d+ - /,'')}</td>
+      <td style="font-size:11px;color:var(--tx3)">${v.location}</td>
+      <td><div style="display:flex;align-items:center;gap:5px"><div style="width:40px;height:5px;background:var(--sur2);border-radius:5px"><div style="height:5px;border-radius:5px;width:${v.pct}%;background:${bc}"></div></div><span style="font-size:11px;color:${bc};font-weight:600">${v.pct}%</span></div></td>
+      ${d.categories.map(c => `<td style="text-align:center;font-size:12px;color:${v.compliance[c]?'var(--gr)':'var(--rd)'}">${v.compliance[c]?'✓':'✗'}</td>`).join('')}
+    </tr>`;
+  }).join('');
+
+  document.getElementById('empInfo').textContent = `Showing ${(DB.empPage-1)*DB.empPageSize+1}–${Math.min(DB.empPage*DB.empPageSize,total)} of ${total}`;
+  const pgr = document.getElementById('empPager');
+  pgr.innerHTML = '';
+  for (let p = 1; p <= Math.min(pages, 8); p++) {
+    const btn = document.createElement('button');
+    btn.className = 'pg' + (p === DB.empPage ? ' on' : '');
+    btn.textContent = p;
+    btn.onclick = (pp => () => { DB.empPage = pp; renderEmpTable(); })(p);
+    pgr.appendChild(btn);
+  }
+}
+
+// ── TABS
+function showTab(id, btn) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  btn.classList.add('active');
+  if (id === 'byManager')  renderMgrTab();
+  if (id === 'byProject')  renderProjTab();
+  if (id === 'byTraining') renderTrTab();
+  if (id === 'employees')  renderEmpTable();
+}
+
+function toggleTR(bid, cid) {
+  document.getElementById(bid).classList.toggle('open');
+  document.getElementById(cid).classList.toggle('open');
+}
+
+function toggleTheme(isDark) {
+  if (isDark) {
+    document.body.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }
+  if (DB.data) {
+    renderMetrics();
+    renderOverview();
+    renderMgrTab();
+    renderProjTab();
+    renderTrTab();
+    renderEmpTable();
+  }
+}
+
+// Initialize theme
+(function initTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark) {
+    document.body.classList.add('dark');
+    document.getElementById('themeToggle').checked = true;
+  } else {
+    document.body.classList.remove('dark');
+    document.getElementById('themeToggle').checked = false;
+  }
+})();
+
+// ── START
+loadData();
+</script>
+</body>
+</html>
