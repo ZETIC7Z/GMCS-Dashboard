@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Admin — GMCS Dashboard Upload</title>
+<link rel="icon" type="image/png" href="/logo.png">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f5f4f0;--sur:#fff;--sur2:#f0efe9;--bd:rgba(0,0,0,.10);--bd2:rgba(0,0,0,.18);--tx:#1a1a18;--tx2:#6b6b65;--tx3:#9c9c95;--gr:#3B6D11;--grb:#EAF3DE;--grm:#639922;--rd:#A32D2D;--rdb:#FCEBEB;--rdm:#E24B4A;--bl:#185FA5;--blb:#E6F1FB;--blm:#378ADD;--am:#854F0B;--amb:#FAEEDA;--amm:#BA7517;--r:10px}
+body.dark{--bg:#121212;--sur:#1a1a1a;--sur2:#242424;--bd:rgba(255,255,255,.08);--bd2:rgba(255,255,255,.15);--tx:#f5f4f0;--tx2:#b5b5b0;--tx3:#8a8a85;--gr:#84cc16;--grb:#162e12;--grm:#65a30d;--rd:#f87171;--rdb:#381515;--rdm:#ef4444;--bl:#60a5fa;--blb:#122538;--blm:#3b82f6;--am:#fbbf24;--amb:#351f0b;--amm:#d97706}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;transition:background 0.3s,color 0.3s}
+.wrap{width:100%;max-width:100%;padding:20px 24px 60px}
+.hitech-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  background: rgba(26, 26, 26, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(161, 0, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(161, 0, 255, 0.2), 0 0 15px rgba(55, 138, 221, 0.15);
+  border-radius: 8px;
+  padding: 16px 20px;
+  color: #fff;
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  transform: translateX(120%) scale(0.9);
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body.dark .hitech-toast {
+  background: rgba(18, 18, 18, 0.9);
+  border-color: rgba(161, 0, 255, 0.6);
+}
+.hitech-toast.show {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+.hitech-toast.hide {
+  transform: translateY(-20px) scale(0.95);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+.toast-glow {
+  width: 8px;
+  height: 8px;
+  background-color: #3b82f6;
+  border-radius: 50%;
+  box-shadow: 0 0 8px #3b82f6;
+  animation: toastGlowPulse 1.5s infinite alternate;
+}
+.toast-success-glow {
+  background-color: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+@keyframes toastGlowPulse {
+  from { opacity: 0.4; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1.1); }
+}
+.header{text-align:center;margin-bottom:36px}
+.logo{width:100px;height:100px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:contain}
+h1{font-size:22px;font-weight:700;letter-spacing:-.03em;margin-bottom:6px}
+.sub{font-size:13px;color:var(--tx3);line-height:1.5}
+.status-bar{background:var(--sur);border:.5px solid var(--bd);border-radius:var(--r);padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.last-update{font-size:12px;color:var(--tx2)}
+.last-update span{font-weight:600;color:var(--tx)}
+.view-link{font-size:12px;color:var(--bl);text-decoration:none;display:flex;align-items:center;gap:4px;padding:5px 12px;border:.5px solid var(--blm);border-radius:6px}
+.view-link:hover{background:var(--blb)}
+.cards{display:flex;flex-direction:column;gap:12px;margin-bottom:20px}
+.ucard{background:var(--sur);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:20px;cursor:pointer;transition:all .2s;position:relative}
+.ucard:hover{border-color:var(--blm);background:var(--blb)}
+.ucard.done{border-style:solid;border-color:var(--grm);background:var(--grb)}
+.ucard-top{display:flex;align-items:center;justify-content:space-between;width:100%;gap:14px}
+.ucard-upload-arrow {
+  color: var(--tx3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+.ucard:hover .ucard-upload-arrow {
+  color: var(--blm);
+  transform: translateY(-2px);
+}
+.ucard.done .arrow-up-svg {
+  display: none !important;
+}
+.ucard.done .check-circle-svg {
+  display: block !important;
+  color: var(--grm);
+}
+.ucard-icon{font-size:28px;flex-shrink:0}
+.ucard-info{flex:1}
+.ucard-name{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px}
+.ucard-desc{font-size:12px;color:var(--tx3)}
+.ucard-status{font-size:12px;color:var(--tx3);margin-top:8px;padding-top:8px;border-top:.5px solid var(--bd)}
+.ucard.done .ucard-status{color:var(--gr);font-weight:500;border-top-color:rgba(99,153,34,.2)}
+.ucard-file{font-size:11px;color:var(--tx2);margin-top:3px}
+input[type=file]{display:none}
+.upload-btn{width:100%;padding:14px;background:linear-gradient(135deg,#A100FF,#7B00FF);color:#fff;border:none;border-radius:var(--r);font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s;margin-bottom:12px}
+.upload-btn:hover{opacity:.9}
+.upload-btn:disabled{opacity:.4;cursor:not-allowed}
+.prog-wrap{display:none;margin-bottom:16px}
+.prog-track{height:6px;background:var(--sur2);border-radius:6px;margin-bottom:8px;overflow:hidden}
+.prog-fill{height:6px;border-radius:6px;background:linear-gradient(90deg,#A100FF,#378ADD);width:0%;transition:width .3s}
+.prog-label{font-size:12px;color:var(--tx2);text-align:center}
+.result-box{display:none;border-radius:var(--r);padding:16px 18px;margin-bottom:16px}
+.result-box.ok{background:var(--grb);border:.5px solid var(--grm)}
+.result-box.err{background:var(--rdb);border:.5px solid var(--rdm)}
+.result-title{font-size:14px;font-weight:600;margin-bottom:6px}
+.result-ok .result-title{color:var(--gr)}.result-err .result-title{color:var(--rd)}
+.result-detail{font-size:12px;color:var(--tx2);line-height:1.6}
+.result-go{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:8px 18px;background:var(--gr);color:#fff;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none}
+.hint{font-size:11px;color:var(--tx3);text-align:center;line-height:1.6}
+.admin-section {
+  background: var(--sur);
+  border-radius: var(--r);
+  border: .5px solid var(--bd);
+  padding: 20px;
+  margin-top: 24px;
+}
+.section-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: .5px solid var(--bd);
+  padding-bottom: 8px;
+}
+.activities-table, .visitors-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  text-align: left;
+}
+.activities-table th, .activities-table td,
+.visitors-table th, .visitors-table td {
+  padding: 10px 12px;
+  border-bottom: .5px solid var(--bd);
+  vertical-align: middle;
+}
+.activities-table th, .visitors-table th {
+  font-weight: 600;
+  color: var(--tx3);
+  text-transform: uppercase;
+  font-size: 10px;
+  letter-spacing: .06em;
+  background: var(--sur2);
+}
+.activities-table tr:hover, .visitors-table tr:hover {
+  background: var(--sur2);
+}
+.activity-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity .15s;
+}
+.btn-danger:hover {
+  opacity: .95;
+}
+.btn-danger:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.admin-profile-card {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: space-between;
+  background: var(--sur);
+  border: .5px solid var(--bd);
+  border-radius: var(--r);
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.profile-avatar {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid var(--bd2);
+  flex-shrink: 0;
+}
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.profile-info {
+  flex: 1;
+}
+.profile-logo {
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: center;
+}
+.profile-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.contact-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+}
+.contact-heading {
+  font-weight: 600;
+  color: var(--tx3);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 4px;
+}
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.contact-icon {
+  color: var(--tx3);
+  flex-shrink: 0;
+}
+.contact-link {
+  color: var(--bl);
+  text-decoration: none;
+}
+.contact-link:hover {
+  text-decoration: underline;
+}
+@media (max-width: 768px) {
+  .admin-profile-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .contact-item {
+    justify-content: center;
+  }
+  .profile-logo {
+    align-self: center;
+    margin-top: 8px;
+  }
+}
+
+/* Theme Switch */
+.theme-switch-wrap{display:flex;align-items:center;margin-left:6px}
+.theme-switch{position:relative;display:inline-block;width:50px;height:26px}
+.theme-switch input{opacity:0;width:0;height:0}
+.slider-t{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background-color:var(--sur2);border:0.5px solid var(--bd2);transition:.3s;border-radius:26px;display:flex;align-items:center;justify-content:space-between;padding:0 5px}
+.slider-t:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background-color:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:.3s cubic-bezier(0.4, 0, 0.2, 1);border-radius:50%;z-index:2}
+.theme-switch input:checked + .slider-t{background-color:var(--blm)}
+.theme-switch input:checked + .slider-t:before{transform:translateX(24px);background-color:#1e1e1e}
+.slider-t .sun-ico,.slider-t .moon-ico{font-size:11px;user-select:none;z-index:1;transition:opacity .3s}
+.slider-t .sun-ico{color:#f59e0b}
+.slider-t .moon-ico{color:#38bdf8;opacity:.3}
+.theme-switch input:checked + .slider-t .sun-ico{opacity:.3}
+.theme-switch input:checked + .slider-t .moon-ico{opacity:1}
+
+</style>
+</head>
+<body>
+<!-- Login Overlay -->
+<div id="loginOverlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--sur);border:.5px solid var(--bd2);border-radius:var(--r);padding:30px;width:100%;max-width:400px;box-shadow:0 10px 25px rgba(0,0,0,0.15);text-align:center;">
+    <div class="logo" style="width:100px;height:100px;margin:0 auto 16px;"><img src="/logo.png" alt="Logo"></div>
+    <h2 style="font-size:18px;font-weight:700;margin-bottom:4px;color:var(--tx)">Admin Access Required</h2>
+    <p style="font-size:12px;color:var(--tx3);margin-bottom:24px;">Please authenticate to access the upload portal.</p>
+    
+    <div style="display:flex;flex-direction:column;gap:16px;text-align:left;">
+      <div class="fg" style="width:100%;display:flex;flex-direction:column;gap:5px;">
+        <label style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;">Username</label>
+        <input type="text" id="loginUser" style="width:100%;font-size:13px;padding:10px 12px;border:.5px solid var(--bd2);border-radius:6px;background:var(--sur2);color:var(--tx);outline:none;" placeholder="admin" value="admin">
+      </div>
+      <div class="fg" style="width:100%;display:flex;flex-direction:column;gap:5px;position:relative;">
+        <label style="font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;">Password</label>
+        <div style="position:relative;display:flex;align-items:center;width:100%;">
+          <input type="password" id="loginPass" style="width:100%;font-size:13px;padding:10px 40px 10px 12px;border:.5px solid var(--bd2);border-radius:6px;background:var(--sur2);color:var(--tx);outline:none;" placeholder="Enter password" onkeydown="if(event.key==='Enter')handleLogin()">
+          <button type="button" onclick="togglePassVisibility()" style="position:absolute;right:10px;background:none;border:none;color:var(--tx3);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;outline:none;">
+            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+      
+      <div id="loginError" style="color:var(--rd);font-size:12px;text-align:center;display:none;margin-top:4px;"></div>
+      
+      <button onclick="handleLogin()" style="width:100%;padding:12px;background:linear-gradient(135deg,#A100FF,#7B00FF);color:#fff;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;margin-top:10px;">
+        Login
+      </button>
+      
+      <a href="/" style="font-size:12px;color:var(--bl);text-align:center;text-decoration:none;margin-top:8px;">← Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="admin-profile-card">
+    <div class="profile-avatar">
+      <img src="/admin-photo.png" alt="Reah Mae Camingawan">
+    </div>
+    <div class="profile-info">
+      <div style="display: flex; flex-direction: column; gap: 2px; margin-bottom: 8px;">
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span style="font-size: 13px; font-weight: 700; color: var(--tx2);">Admin</span>
+          <svg style="width: 14px; height: 14px; fill: #475569; color: var(--sur); display: inline-block; vertical-align: middle;" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div style="font-size: 11px; color: var(--tx3);">Site Administrator</div>
+      </div>
+      <h1 style="font-size: 28px; font-weight: 700; color: var(--tx); margin-bottom: 12px; letter-spacing: -0.5px; line-height: 1.2;">Reah Mae Camingawan</h1>
+      
+      <div class="contact-details">
+        <div class="contact-heading">Contact details</div>
+        
+        <div class="contact-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="contact-icon"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <a href="mailto:reyamae14@gmail.com" class="contact-link">reyamae14@gmail.com</a>
+        </div>
+        
+        <div class="contact-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="contact-icon"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <span style="color: var(--tx2);">+63 995 779 0220</span>
+        </div>
+        
+        <div class="contact-item">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="contact-icon"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span style="color: var(--tx2);">August 11, 1996</span>
+        </div>
+      </div>
+    </div>
+    <!-- Site Logo on the right -->
+    <div class="profile-logo">
+      <img src="/logo.png" alt="Site Logo">
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="last-update" id="currentStatus">Checking current data…</div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <a href="/" class="view-link">← View Dashboard</a>
+      
+      <div class="theme-switch-wrap">
+        <label class="theme-switch" title="Toggle Light/Dark Mode">
+          <input type="checkbox" id="themeToggle" onchange="toggleTheme(this.checked)">
+          <span class="slider-t">
+            <span class="sun-ico">☀️</span>
+            <span class="moon-ico">🌙</span>
+          </span>
+        </label>
+      </div>
+      
+      <button onclick="manualLogout()" class="view-link" style="background:var(--sur); color:var(--rd); border-color:var(--rdm); cursor:pointer; font-family:inherit;">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="cards">
+    <div class="ucard" id="uc-tracker" onclick="triggerUpload('tracker')">
+      <div class="ucard-top">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="ucard-icon">📊</div>
+          <div class="ucard-info">
+            <div class="ucard-name">Compliance &amp; Mandatory Tracker</div>
+            <div class="ucard-desc">FY26_GMCS_Compliance_Mandatory_Tracker_extraction.xlsx</div>
+          </div>
+        </div>
+        <div class="ucard-upload-arrow">
+          <svg class="arrow-up-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <svg class="check-circle-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ucard-status" id="us-tracker">⬆ Click to select file (.xlsx)</div>
+      <div class="ucard-file" id="uf-tracker"></div>
+      <input type="file" id="fi-tracker" accept=".xlsx,.xls" onchange="handleFile(event,'tracker')">
+    </div>
+    <div class="ucard" id="uc-roster" onclick="triggerUpload('roster')">
+      <div class="ucard-top">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="ucard-icon">👥</div>
+          <div class="ucard-info">
+            <div class="ucard-name">GMCS Roster List</div>
+            <div class="ucard-desc">FY26_GMCS_Roster_List_.xlsx</div>
+          </div>
+        </div>
+        <div class="ucard-upload-arrow">
+          <svg class="arrow-up-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <svg class="check-circle-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ucard-status" id="us-roster">⬆ Click to select file (.xlsx)</div>
+      <div class="ucard-file" id="uf-roster"></div>
+      <input type="file" id="fi-roster" accept=".xlsx,.xls" onchange="handleFile(event,'roster')">
+    </div>
+    <div class="ucard" id="uc-mandatory" onclick="triggerUpload('mandatory')">
+      <div class="ucard-top">
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="ucard-icon">📋</div>
+          <div class="ucard-info">
+            <div class="ucard-name">Mandatory &amp; Compliance List for FY26</div>
+            <div class="ucard-desc">Mandatory___Compliance_List_for_FY26.xlsx</div>
+          </div>
+        </div>
+        <div class="ucard-upload-arrow">
+          <svg class="arrow-up-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+          <svg class="check-circle-svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+      </div>
+      <div class="ucard-status" id="us-mandatory">⬆ Click to select file (.xlsx)</div>
+      <div class="ucard-file" id="uf-mandatory"></div>
+      <input type="file" id="fi-mandatory" accept=".xlsx,.xls" onchange="handleFile(event,'mandatory')">
+    </div>
+  </div>
+
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    <div class="prog-label" id="progLabel">Starting…</div>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-title" id="resultTitle"></div>
+    <div class="result-detail" id="resultDetail"></div>
+    <a href="/" id="resultGoBtn" class="result-go" style="display:none">View Updated Dashboard →</a>
+  </div>
+
+  <button class="upload-btn" id="uploadBtn" onclick="startUpload()" disabled>
+    Upload &amp; Update Dashboard
+  </button>
+  <div class="hint">
+    Files are processed server-side · Data saved to Vercel Blob · Dashboard updates instantly for all viewers<br>
+    All 3 files must be selected before uploading
+  </div>
+
+  <!-- Visitor Analytics section -->
+  <div class="admin-section" id="visitorsCard" style="display:none; margin-top:24px;">
+    <div class="section-title">👥 Visitor Analytics</div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+      <div style="background:var(--sur2); padding:12px; border-radius:6px; text-align:center;">
+        <div style="font-size:10px; color:var(--tx3); text-transform:uppercase; margin-bottom:4px;">Total Views</div>
+        <div style="font-size:24px; font-weight:700;" id="statTotalViews">0</div>
+      </div>
+      <div style="background:var(--sur2); padding:12px; border-radius:6px; text-align:center;">
+        <div style="font-size:10px; color:var(--tx3); text-transform:uppercase; margin-bottom:4px;">Unique Visitors</div>
+        <div style="font-size:24px; font-weight:700;" id="statUniqueVisitors">0</div>
+      </div>
+    </div>
+    <div style="max-height:250px; overflow-y:auto; border:.5px solid var(--bd); border-radius:6px;">
+      <table class="visitors-table">
+        <thead>
+          <tr>
+            <th>Location</th>
+            <th>IP Address</th>
+            <th>Date &amp; Time</th>
+          </tr>
+        </thead>
+        <tbody id="visitorsList">
+          <tr><td colspan="3" style="text-align:center; color:var(--tx3);">Loading visitor logs…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Activities section -->
+  <div class="admin-section" id="activitiesCard" style="display:none; margin-top:24px;">
+    <div class="section-title">🕒 Recent Activities</div>
+    <div class="activity-actions">
+      <label style="display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; user-select:none;">
+        <input type="checkbox" id="selectAllActivities" onchange="toggleSelectAllActivities(this.checked)"> Select All
+      </label>
+      <button id="clearActivitiesBtn" onclick="confirmClearActivities()" class="btn-danger" disabled>Clear Selected</button>
+    </div>
+    <div style="max-height:250px; overflow-y:auto; border:.5px solid var(--bd); border-radius:6px;">
+      <table class="activities-table">
+        <thead>
+          <tr>
+            <th style="width:45px; text-align:center;">Select</th>
+            <th>Date &amp; Time</th>
+            <th>Activity Details</th>
+          </tr>
+        </thead>
+        <tbody id="activitiesList">
+          <tr><td colspan="3" style="text-align:center; color:var(--tx3);">Loading activity logs…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Modal for Confirmation -->
+<div id="confirmModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center; padding:20px;">
+  <div style="background:var(--sur); border:.5px solid var(--bd2); border-radius:var(--r); padding:24px; width:100%; max-width:440px; box-shadow:0 10px 25px rgba(0,0,0,0.25);">
+    <h3 style="font-size:16px; font-weight:700; margin-bottom:12px; color:var(--tx);">Confirm Action</h3>
+    <p style="font-size:13px; color:var(--tx2); margin-bottom:20px; line-height:1.5;" id="confirmMessage">Are you sure?</p>
+    <div style="display:flex; justify-content:flex-end; gap:10px;">
+      <button onclick="closeConfirmModal()" class="btn-sm" style="padding:8px 16px;">No, Cancel</button>
+      <button id="confirmYesBtn" class="btn-danger" style="padding:8px 16px;">Yes, Clear</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Theme sync
+(function() {
+  const savedTheme = localStorage.getItem('theme');
+  const isDark = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  if (isDark) {
+    document.body.classList.add('dark');
+  }
+})();
+
+const files = { tracker: null, roster: null, mandatory: null };
+
+// Check current data status
+async function checkCurrentData() {
+  try {
+    const res = await fetch('/api/data');
+    if (res.ok) {
+      const d = await res.json();
+      if (d.generated_at) {
+        const dt = new Date(d.generated_at);
+        const fmt = dt.toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        document.getElementById('currentStatus').innerHTML =
+          `Current data: <span>${d.summary?.total_active || '?'} employees</span> · Last updated: <span>${fmt}</span>`;
+      } else {
+        document.getElementById('currentStatus').textContent = 'Current data loaded';
+      }
+    } else {
+      document.getElementById('currentStatus').textContent = 'No data yet — upload files to populate the dashboard';
+    }
+  } catch(e) {
+    document.getElementById('currentStatus').textContent = 'Could not load current status';
+  }
+}
+
+function triggerUpload(type) {
+  document.getElementById('fi-' + type).click();
+}
+
+function handleFile(event, type) {
+  const file = event.target.files[0];
+  if (!file) return;
+  files[type] = file;
+  document.getElementById('uc-' + type).classList.add('done');
+  document.getElementById('us-' + type).textContent = '✓ Ready: ' + file.name;
+  document.getElementById('uf-' + type).textContent = (file.size / 1024).toFixed(0) + ' KB';
+  checkReady();
+}
+
+function checkReady() {
+  const ready = files.tracker && files.roster && files.mandatory;
+  document.getElementById('uploadBtn').disabled = !ready;
+}
+
+function setProgress(pct, label) {
+  document.getElementById('progFill').style.width  = pct + '%';
+  document.getElementById('progLabel').textContent = label;
+}
+
+async function startUpload() {
+  document.getElementById('uploadBtn').disabled = true;
+  document.getElementById('progWrap').style.display = 'block';
+  document.getElementById('resultBox').style.display = 'none';
+
+  try {
+    setProgress(10, 'Preparing files…');
+    const formData = new FormData();
+    formData.append('tracker',   files.tracker);
+    formData.append('roster',    files.roster);
+    formData.append('mandatory', files.mandatory);
+
+    setProgress(30, 'Uploading to server…');
+    const auth = sessionStorage.getItem('admin_auth') || '';
+    const res = await fetch('/api/upload', { 
+      method: 'POST', 
+      body: formData,
+      headers: {
+        'Authorization': auth
+      }
+    });
+    setProgress(70, 'Processing compliance data…');
+
+    const result = await res.json();
+    setProgress(100, 'Done!');
+
+    const box = document.getElementById('resultBox');
+    if (res.ok && result.success) {
+      box.className = 'result-box ok';
+      document.getElementById('resultTitle').textContent = '✓ Dashboard updated successfully';
+      const dt = new Date(result.generated_at);
+      document.getElementById('resultDetail').innerHTML =
+        `<strong>${result.total_employees}</strong> active employees processed<br>` +
+        `Generated at: ${dt.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}<br>` +
+        `The main dashboard at <strong>/</strong> now shows the updated data for all viewers.`;
+      document.getElementById('resultGoBtn').style.display = 'inline-flex';
+      box.style.display = 'block';
+      checkCurrentData();
+      fetchAnalytics();
+    } else {
+      box.className = 'result-box err';
+      document.getElementById('resultTitle').textContent = '✗ Upload failed';
+      document.getElementById('resultDetail').textContent = result.error || 'Unknown error. Check that the files match the expected format.';
+      box.style.display = 'block';
+      document.getElementById('uploadBtn').disabled = false;
+    }
+  } catch(err) {
+    setProgress(0, '');
+    const box = document.getElementById('resultBox');
+    box.className = 'result-box err';
+    document.getElementById('resultTitle').textContent = '✗ Network error';
+    document.getElementById('resultDetail').textContent = err.message;
+    box.style.display = 'block';
+    document.getElementById('uploadBtn').disabled = false;
+  }
+}
+
+// Setup drag and drop
+['tracker','roster','mandatory'].forEach(type => {
+  const card = document.getElementById('uc-' + type);
+  card.addEventListener('dragover', e => { e.preventDefault(); card.style.borderColor = 'var(--blm)'; });
+  card.addEventListener('dragleave', () => { if (!files[type]) card.style.borderColor = ''; });
+  card.addEventListener('drop', e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.name.match(/\.xlsx?$/i)) return;
+    files[type] = file;
+    document.getElementById('uc-' + type).classList.add('done');
+    document.getElementById('us-' + type).textContent = '✓ Ready: ' + file.name;
+    document.getElementById('uf-' + type).textContent = (file.size / 1024).toFixed(0) + ' KB';
+    checkReady();
+  });
+});
+
+// Authentication handlers
+function togglePassVisibility() {
+  const passInput = document.getElementById('loginPass');
+  const eyeIcon = document.getElementById('eyeIcon');
+  if (passInput.type === 'password') {
+    passInput.type = 'text';
+    eyeIcon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    passInput.type = 'password';
+    eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+  }
+}
+
+// High-tech Toast Notification
+function showHitechToast(message, isSuccess = true) {
+  const existing = document.getElementById('hitechToast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'hitechToast';
+  toast.className = 'hitech-toast';
+  
+  const indicator = document.createElement('div');
+  indicator.className = 'toast-glow' + (isSuccess ? ' toast-success-glow' : '');
+  
+  const text = document.createElement('div');
+  text.style.fontSize = '13px';
+  text.style.fontWeight = '500';
+  text.style.fontFamily = 'inherit';
+  text.textContent = message;
+  
+  toast.appendChild(indicator);
+  toast.appendChild(text);
+  document.body.appendChild(toast);
+  
+  // Trigger entry animation
+  setTimeout(() => {
+    toast.classList.add('show');
+  }, 50);
+  
+  // Dismiss after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.classList.add('hide');
+    setTimeout(() => {
+      toast.remove();
+    }, 400);
+  }, 3000);
+}
+
+// Random Greetings Pool based on hour (Ph timezone consistent)
+function getLoginGreeting() {
+  const hour = new Date().getHours();
+  let greetings = [];
+  
+  if (hour >= 5 && hour < 12) {
+    greetings = [
+      "Welcome back, Admin Reah. Have a wonderful and productive morning!",
+      "Good morning, Admin Reah. Systems initialized and fully operational.",
+      "Good morning! Authenticated successfully. Hope you have a great day, Admin Reah."
+    ];
+  } else if (hour >= 12 && hour < 18) {
+    greetings = [
+      "Good afternoon, Admin Reah. Accessing the portal controls.",
+      "Welcome back, Admin Reah. Ready to review compliance metrics?",
+      "Good afternoon! Secure admin session successfully established."
+    ];
+  } else {
+    greetings = [
+      "Good evening, Admin Reah. Logging into the secure database.",
+      "Welcome back, Admin Reah. System check: online and secure.",
+      "Good evening! Establishing secure connection. Welcome back, Reah."
+    ];
+  }
+  
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
+function getLogoutGreeting() {
+  const greetings = [
+    "Goodbye, Admin Reah. Session closed and token cleared.",
+    "Logout successful. Have a wonderful day ahead, Reah!",
+    "Secure session terminated. Goodbye, Admin Reah.",
+    "Security keys released. Safe travels, Admin Reah."
+  ];
+  return greetings[Math.floor(Math.random() * greetings.length)];
+}
+
+async function handleLogin() {
+  const user = document.getElementById('loginUser').value;
+  const pass = document.getElementById('loginPass').value;
+  const errDiv = document.getElementById('loginError');
+  errDiv.style.display = 'none';
+
+  const creds = btoa(user + ':' + pass);
+  const authString = 'Basic ' + creds;
+
+  try {
+    const res = await fetch('/api/login', {
+      method: 'POST',
+      headers: {
+        'Authorization': authString
+      }
+    });
+    if (res.ok) {
+      sessionStorage.setItem('admin_auth', authString);
+      document.getElementById('loginOverlay').style.display = 'none';
+      checkCurrentData();
+      fetchAnalytics();
+      initInactivityTracker();
+      showHitechToast(getLoginGreeting(), true);
+    } else {
+      errDiv.textContent = 'Invalid username or password.';
+      errDiv.style.display = 'block';
+    }
+  } catch (e) {
+    errDiv.textContent = 'Connection error. Please try again.';
+    errDiv.style.display = 'block';
+  }
+}
+
+async function checkAuthOnLoad() {
+  if (checkInactivityOnLoad()) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+    return;
+  }
+  
+  const auth = sessionStorage.getItem('admin_auth');
+  if (!auth) {
+    document.getElementById('loginOverlay').style.display = 'flex';
+  } else {
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Authorization': auth }
+      });
+      if (res.ok) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        checkCurrentData();
+        fetchAnalytics();
+        initInactivityTracker();
+      } else {
+        sessionStorage.removeItem('admin_auth');
+        document.getElementById('loginOverlay').style.display = 'flex';
+      }
+    } catch (e) {
+      document.getElementById('loginOverlay').style.display = 'none';
+      checkCurrentData();
+      fetchAnalytics();
+      initInactivityTracker();
+    }
+  }
+}
+
+// Inactivity session tracker
+let inactivityTimer;
+const INACTIVITY_LIMIT = 60 * 60 * 1000; // 1 hour
+
+function resetInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  sessionStorage.setItem('admin_last_active', Date.now().toString());
+  inactivityTimer = setTimeout(autoLogout, INACTIVITY_LIMIT);
+}
+
+function autoLogout() {
+  sessionStorage.removeItem('admin_auth');
+  sessionStorage.removeItem('admin_last_active');
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('visitorsCard').style.display = 'none';
+  document.getElementById('activitiesCard').style.display = 'none';
+  alert('You have been logged out due to 1 hour of inactivity.');
+}
+
+function checkInactivityOnLoad() {
+  const lastActive = sessionStorage.getItem('admin_last_active');
+  if (lastActive) {
+    const elapsed = Date.now() - parseInt(lastActive, 10);
+    if (elapsed >= INACTIVITY_LIMIT) {
+      sessionStorage.removeItem('admin_auth');
+      sessionStorage.removeItem('admin_last_active');
+      return true;
+    }
+  }
+  return false;
+}
+
+function initInactivityTracker() {
+  resetInactivityTimer();
+  ['mousemove', 'keydown', 'mousedown', 'touchstart', 'scroll'].forEach(evt => {
+    window.addEventListener(evt, resetInactivityTimer, true);
+  });
+  
+  setInterval(() => {
+    const lastActive = sessionStorage.getItem('admin_last_active');
+    if (lastActive) {
+      const elapsed = Date.now() - parseInt(lastActive, 10);
+      if (elapsed >= INACTIVITY_LIMIT) {
+        autoLogout();
+      }
+    }
+  }, 10000);
+}
+
+function manualLogout() {
+  const msg = getLogoutGreeting();
+  sessionStorage.removeItem('admin_auth');
+  sessionStorage.removeItem('admin_last_active');
+  document.getElementById('visitorsCard').style.display = 'none';
+  document.getElementById('activitiesCard').style.display = 'none';
+  document.getElementById('loginOverlay').style.display = 'flex';
+  document.getElementById('loginPass').value = '';
+  showHitechToast(msg, false);
+}
+
+// Geolocation flag helper
+function getFlagEmoji(countryCode) {
+  if (!countryCode || countryCode === 'Unknown') return '🏳️';
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  try {
+    return String.fromCodePoint(...codePoints);
+  } catch(e) {
+    return '🏳️';
+  }
+}
+
+// Analytics and activity log operations
+async function fetchAnalytics() {
+  const auth = sessionStorage.getItem('admin_auth') || '';
+  if (!auth) return;
+
+  document.getElementById('visitorsCard').style.display = 'block';
+  document.getElementById('activitiesCard').style.display = 'block';
+
+  try {
+    const visitsRes = await fetch('/api/visits', { headers: { 'Authorization': auth } });
+    if (visitsRes.ok) {
+      const vData = await visitsRes.json();
+      document.getElementById('statTotalViews').textContent = vData.total_views;
+      document.getElementById('statUniqueVisitors').textContent = vData.unique_visitors;
+      
+      const vList = document.getElementById('visitorsList');
+      if (vData.visits && vData.visits.length > 0) {
+        vList.innerHTML = vData.visits.map(v => {
+          const dt = new Date(v.timestamp);
+          const dtFmt = dt.toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+          const flag = getFlagEmoji(v.country);
+          return `<tr>
+            <td>${flag} ${v.city || 'Unknown'}, ${v.country || 'Unknown'}</td>
+            <td><code>${v.ip}</code></td>
+            <td>${dtFmt}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        vList.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--tx3);">No visitor logs recorded yet.</td></tr>`;
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching visits:', err);
+  }
+
+  try {
+    const actRes = await fetch('/api/activities', { headers: { 'Authorization': auth } });
+    if (actRes.ok) {
+      const aData = await actRes.json();
+      const aList = document.getElementById('activitiesList');
+      if (aData.activities && aData.activities.length > 0) {
+        aList.innerHTML = aData.activities.map(a => {
+          const dt = new Date(a.timestamp);
+          const dtFmt = dt.toLocaleDateString('en-PH', {year:'numeric',month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',second:'2-digit'});
+          const detailsStr = a.total_employees ? `${a.action} (${a.total_employees} employees)` : a.action;
+          return `<tr>
+            <td style="text-align:center;"><input type="checkbox" name="activityCheckbox" value="${a.id}" onchange="updateClearButtonState()"></td>
+            <td>${dtFmt}</td>
+            <td>${detailsStr}</td>
+          </tr>`;
+        }).join('');
+      } else {
+        aList.innerHTML = `<tr><td colspan="3" style="text-align:center; color:var(--tx3);">No recent activity logs.</td></tr>`;
+      }
+      document.getElementById('selectAllActivities').checked = false;
+      updateClearButtonState();
+    }
+  } catch (err) {
+    console.error('Error fetching activities:', err);
+  }
+}
+
+function toggleSelectAllActivities(checked) {
+  const checkboxes = document.getElementsByName('activityCheckbox');
+  checkboxes.forEach(cb => cb.checked = checked);
+  updateClearButtonState();
+}
+
+function updateClearButtonState() {
+  const checkboxes = document.getElementsByName('activityCheckbox');
+  let checkedCount = 0;
+  checkboxes.forEach(cb => { if (cb.checked) checkedCount++; });
+  
+  const btn = document.getElementById('clearActivitiesBtn');
+  btn.disabled = checkedCount === 0;
+  
+  const selectAll = document.getElementById('selectAllActivities');
+  if (checkboxes.length > 0 && checkedCount === checkboxes.length) {
+    selectAll.checked = true;
+  } else {
+    selectAll.checked = false;
+  }
+}
+
+function confirmClearActivities() {
+  const checkboxes = document.getElementsByName('activityCheckbox');
+  let checkedCount = 0;
+  checkboxes.forEach(cb => { if (cb.checked) checkedCount++; });
+  
+  if (checkedCount === 0) return;
+  
+  const totalCount = checkboxes.length;
+  const isAll = checkedCount === totalCount;
+  
+  const modal = document.getElementById('confirmModal');
+  const msg = document.getElementById('confirmMessage');
+  
+  if (isAll) {
+    msg.textContent = 'ARE YOU SURE TO CLEAR ALL YOUR RECENT ACTIVITY LOGS?';
+  } else {
+    msg.textContent = `ARE YOU SURE TO CLEAR THIS ${checkedCount} RECENT LOGS YOU SELECTED?`;
+  }
+  
+  modal.style.display = 'flex';
+  
+  document.getElementById('confirmYesBtn').onclick = async () => {
+    closeConfirmModal();
+    await doClearActivities(isAll);
+  };
+}
+
+function closeConfirmModal() {
+  document.getElementById('confirmModal').style.display = 'none';
+}
+
+async function doClearActivities(isAll) {
+  const auth = sessionStorage.getItem('admin_auth') || '';
+  if (!auth) return;
+  
+  let payload = {};
+  if (isAll) {
+    payload = { all: true };
+  } else {
+    const checkboxes = document.getElementsByName('activityCheckbox');
+    const selectedIds = [];
+    checkboxes.forEach(cb => {
+      if (cb.checked) selectedIds.push(cb.value);
+    });
+    payload = { ids: selectedIds };
+  }
+  
+  try {
+    const res = await fetch('/api/activities', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': auth
+      },
+      body: JSON.stringify(payload)
+    });
+    if (res.ok) {
+      await fetchAnalytics();
+    } else {
+      alert('Failed to clear activities.');
+    }
+  } catch (err) {
+    alert('Error clearing activities: ' + err.message);
+  }
+}
+
+function toggleTheme(isDark) {
+  if (isDark) {
+    document.body.classList.add('dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.body.classList.remove('dark');
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+// Sync theme toggle switch checkbox state
+const savedTheme = localStorage.getItem('theme');
+const isDarkTheme = savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches);
+const toggleInput = document.getElementById('themeToggle');
+if (toggleInput) {
+  toggleInput.checked = isDarkTheme;
+}
+
+checkAuthOnLoad();
+</script>
+</body>
+</html>
