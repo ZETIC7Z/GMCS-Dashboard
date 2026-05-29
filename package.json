@@ -1,0 +1,17 @@
+{
+  "name": "gmcs-compliance-dashboard",
+  "version": "1.0.0",
+  "description": "FY26 GMCS Training Compliance Dashboard — Accenture GMCS PH",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "@vercel/blob": "^0.23.4",
+    "xlsx": "^0.18.5"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
