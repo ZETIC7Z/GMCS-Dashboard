@@ -177,39 +177,38 @@ tbody td{padding:8px 12px;vertical-align:middle}
 .tr-sel-wrap select{font-size:12px;padding:6px 28px 6px 10px;border:.5px solid var(--bd2);border-radius:6px;background:var(--sur2);color:var(--tx);outline:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b6b65'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;min-width:320px}
 /* Footer */
 .dfooter {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 20px;
-  padding: 30px 24px 45px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 40px;
+  padding: 60px 24px 80px; /* added more space at footer */
   border-top: .5px solid var(--bd);
-  margin-top: 40px;
+  margin-top: 80px; /* added more space before footer */
 }
 .dfooter-left {
   display: flex;
-}
-.dfooter-center {
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: 8px;
+  align-items: flex-start;
+  text-align: left;
+  gap: 10px;
+  max-width: 65%;
 }
-.dfooter-center .disclaimer {
-  font-size: 11px;
-  color: var(--tx3);
-  max-width: 650px;
-  line-height: 1.5;
+.dfooter-left .disclaimer {
+  font-size: 12px;
+  color: var(--tx2); /* simple readable color and font size */
+  line-height: 1.6;
   font-weight: 400;
+  max-width: 650px;
 }
-.dfooter-center .report-title {
-  font-size: 12.5px;
+.dfooter-left .report-title {
+  font-size: 14px;
   color: var(--tx);
   font-weight: 600;
   letter-spacing: 0.03em;
+  margin-top: 4px;
 }
-.dfooter-center .copyright {
-  font-size: 11px;
+.dfooter-left .copyright {
+  font-size: 12px;
   color: var(--tx2);
   font-weight: 500;
 }
@@ -217,23 +216,24 @@ tbody td{padding:8px 12px;vertical-align:middle}
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 12px;
+  gap: 18px;
   text-align: right;
+  flex-shrink: 0;
 }
 .support-text {
   display: flex;
   flex-direction: column;
-  line-height: 1.4;
+  line-height: 1.5;
 }
 .support-text .support-title {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--tx);
   letter-spacing: 0.05em;
 }
 .support-text .support-sub {
   font-size: 11px;
-  color: var(--tx3);
+  color: var(--tx2);
 }
 .support-link {
   display: inline-block;
@@ -243,10 +243,14 @@ tbody td{padding:8px 12px;vertical-align:middle}
   transform: scale(1.08);
 }
 .support-gif {
-  width: 44px;
-  height: 44px;
+  width: 76px; /* make inquiry icon bigger */
+  height: 76px; /* make inquiry icon bigger */
   display: block;
-  border-radius: 4px;
+  border-radius: 8px; /* square with rounded corners as in check image 1 */
+  background-color: #fff;
+  padding: 5px;
+  border: 2px solid var(--blm);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 @media (max-width: 950px) {
   .dfooter {
@@ -254,7 +258,14 @@ tbody td{padding:8px 12px;vertical-align:middle}
     flex-direction: column;
     align-items: center;
     gap: 24px;
-    padding: 24px 16px 40px;
+    padding: 40px 16px 60px; /* added space for mobile too */
+    text-align: center;
+    margin-top: 50px;
+  }
+  .dfooter-left {
+    align-items: center;
+    text-align: center;
+    max-width: 100%;
   }
   .dfooter-right {
     justify-content: center;
@@ -293,7 +304,7 @@ tbody td{padding:8px 12px;vertical-align:middle}
 
 <!-- Loading screen -->
 <div id="loadingScreen" class="loading-screen">
-  <div class="loading-logo"><img src="/logo.png" alt="Logo"></div>
+  <div class="loading-logo"><img src="logo.png" alt="Logo"></div>
   <div class="loading-title">FY26 GMCS Compliance Dashboard</div>
   <div class="loading-bar-wrap"><div class="loading-bar"></div></div>
   <div class="loading-sub" id="loadingMsg">Loading latest data…</div>
@@ -312,7 +323,7 @@ tbody td{padding:8px 12px;vertical-align:middle}
 
 <div class="topbar">
   <div class="brand">
-    <div class="logo"><img src="/logo.png" alt="Logo"></div>
+    <div class="logo"><img src="logo.png" alt="Logo"></div>
     <div>
       <div class="brand-t">FY26 GMCS Training Compliance Dashboard</div>
       <div class="brand-s" id="lastUpdated">Accenture · GMCS PH</div>
@@ -468,8 +479,7 @@ tbody td{padding:8px 12px;vertical-align:middle}
 </div>
 
 <div class="dfooter">
-  <div class="dfooter-left"></div>
-  <div class="dfooter-center">
+  <div class="dfooter-left">
     <div class="disclaimer">This site is an internal tracking portal developed exclusively for company use. All data and reports are strictly designated for internal organizational purposes.</div>
     <div class="report-title">FY26 GMCS Training Compliance Report · Accenture GMCS PH</div>
     <div class="copyright">© 2026 · ALL RIGHTS RESERVED Developed by Reah Mae C.</div>
@@ -480,7 +490,7 @@ tbody td{padding:8px 12px;vertical-align:middle}
       <div class="support-sub">support please log a ticket at</div>
     </div>
     <a href="https://ts.accenture.com/sites/GMCSPHGlobalManagedCloudServicePhilippines/SitePages/Centralized-GMCS-PMO-Tracker-Page.aspx" target="_blank" class="support-link" title="Centralized GMCS PMO Tracker Page">
-      <img src="/support.gif" alt="Support" class="support-gif">
+      <img src="support.gif" alt="Support" class="support-gif">
     </a>
   </div>
 </div>
