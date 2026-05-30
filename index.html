@@ -215,7 +215,7 @@ tbody td{padding:8px 12px;vertical-align:middle}
 .dfooter-right {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
+  align-items: flex-end; /* Align elements to the bottom to match vertical alignment of left column */
   gap: 18px;
   text-align: right;
   flex-shrink: 0;
@@ -224,6 +224,7 @@ tbody td{padding:8px 12px;vertical-align:middle}
   display: flex;
   flex-direction: column;
   line-height: 1.5;
+  margin-bottom: 8px; /* fine-tune alignment with the report title on the left */
 }
 .support-text .support-title {
   font-size: 13px;
@@ -243,8 +244,8 @@ tbody td{padding:8px 12px;vertical-align:middle}
   transform: scale(1.08);
 }
 .support-gif {
-  width: 160px; /* enlarged transparent GIF to match the user's blue box */
-  height: 160px; /* enlarged transparent GIF to match the user's blue box */
+  width: 208px; /* enlarged transparent GIF by 30% from 160px */
+  height: 208px; /* enlarged transparent GIF by 30% from 160px */
   display: block;
   /* removed background, border, padding, and shadow to display transparently */
 }
